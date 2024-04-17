@@ -3,8 +3,8 @@ let boardHeight = 300;
 let boardWidth = 750;
 let context;
 
-let dinoWidth = 75;
-let dinoHeight = 80;
+let dinoWidth = 100;
+let dinoHeight = 90;
 let dinoX = 50;
 let dinoY = boardHeight - dinoHeight;
 let dinoImg;
@@ -15,10 +15,10 @@ let dino = {
   width: dinoWidth,
   height: dinoHeight,
 };
-
+let id = null;
 let cactus = [];
-let cactus_width = [34, 69, 102];
-let cactus_height = 70;
+let cactus_width = [50, 69, 90];
+let cactus_height = 80;
 
 let cactusX = 700;
 let cactusY = boardHeight - cactus_height;
@@ -40,9 +40,25 @@ window.onload = function () {
   board.width = boardWidth;
 
   context = board.getContext("2d");
-  // context.fillStyle="green";
-  // context.fillRect(dino.X,dino.Y,dino.width,dino.height);
+  const startButton = document.getElementById("startButton");
+  startButton.addEventListener("click", startGame);
+};
 
+function startGame() {
+  if (id) {
+    clearInterval(id);
+  }
+
+  gameOver = false;
+  score = 0;
+  dino.Y = dinoY;
+  cactus = [];
+
+  board = document.getElementById("board");
+  board.height = boardHeight;
+  board.width = boardWidth;
+
+  context = board.getContext("2d");
   dinoImg = new Image();
   dinoImg.src = "../assets/dino.png";
   dinoImg.onload = function () {
@@ -51,32 +67,60 @@ window.onload = function () {
   };
 
   cactus1_Img = new Image();
-  cactus1_Img.src = "../assets/cactus1.png";
+  cactus1_Img.src = "../assets/cactusGreen1.png";
 
   cactus2_Img = new Image();
-  cactus2_Img.src = "../assets/cactus2.png";
+  cactus2_Img.src = "../assets/cactusGreen2.png";
 
   cactus3_Img = new Image();
-  cactus3_Img.src = "../assets/cactus3.png";
+  cactus3_Img.src = "../assets/cactusGreen3.png";
+
+  //Theme
+  const dropdownItems = document.querySelectorAll(".dropdown-item");
+
+  dropdownItems.forEach((item) => {
+    item.addEventListener("click", function () {
+      const themeId = this.id;
+      switch (themeId) {
+        case "theme1":
+          board.style.backgroundImage = "url('../assets/background.jpg')";
+          break;
+        case "theme2":
+          board.style.backgroundImage = "url('../assets/night_background.jpg')";
+          break;
+        case "theme3":
+          board.style.backgroundImage =
+            "url('../assets/underwater_background.jpg')";
+          break;
+        default:
+          board.style.backgroundImage = "url('../assets/background.jpg')";
+      }
+    });
+  });
 
   requestAnimationFrame(update);
-  setInterval(SpawnCactus, 1000);
+
+  id = setInterval(SpawnCactus, 1000);
   document.addEventListener("keydown", MoveDino);
-};
+}
 
 function update() {
   requestAnimationFrame(update);
   if (gameOver) {
-    context.fillStyle="black";
-    context.font="30px courier";
+    context.fillStyle = "white";
+    context.font = "30px courier";
     score++;
-    context.fillText("Game Over",300,100);
+    context.fillText("Game Over", 300, 100);
     return;
   }
+
   context.clearRect(0, 0, board.width, board.height);
 
   velocityY += gravity;
   dino.Y = Math.min(dino.Y + velocityY, dinoY);
+
+  console.log("velX", velocityX);
+  console.log("velY", velocityY);
 
   context.drawImage(dinoImg, dino.X, dino.Y, dino.width, dino.height);
   for (let i = 0; i < cactus.length; i++) {
@@ -92,18 +136,17 @@ function update() {
 
     if (DetectCollision(dino, cactus1)) {
       gameOver = true;
-      dinoImg.src = "../assets/dino-dead.png";
+      dinoImg.src = "../assets/dino.png";
       dinoImg.onload = function () {
         context.drawImage(dinoImg, dino.X, dino.Y, dino.width, dino.height);
       };
     }
   }
 
-  context.fillStyle="black";
-  context.font="20px courier";
+  context.fillStyle = "white";
+  context.font = "20px courier";
   score++;
-  context.fillText(score,5,20);
-
+  context.fillText(score, 5, 20);
 }
 
 function MoveDino(e) {
